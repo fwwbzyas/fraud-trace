@@ -1,0 +1,37 @@
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+**/node_modules/
+**/dist/
+**/target/
+**/output/
+**/spark-warehouse/
+**/hadoop_data/
+
+*.log
+*.pid
+
+# Python and generated local data
+__pycache__/
+*.py[cod]
+.venv/
+**/temp_csv/
+**/deploy_info.json
+
+# Local credentials (examples remain versioned)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+application-local.properties
+application-local.yml
+application-local.yaml
+**/metastore_db/
+
+# Legacy/generated frontend bundle; maintained source lives under frontend/
+batch/src/main/resources/static/assets/

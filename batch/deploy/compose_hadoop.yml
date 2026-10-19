@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    hostname: namenode
+    restart: always
+    ports:
+      - 9870:9870
+      - 8020:9000
+    volumes:
+      - ../../backend/hadoop_data/namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+    networks:
+      - hadoop_net
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    hostname: datanode
+    restart: always
+    volumes:
+      - ../../backend/hadoop_data/datanode:/hadoop/dfs/data
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+    env_file:
+      - ./hadoop.env
+    ports:
+      - 9864:9864
+      # 🔥🔥🔥 核心修复：必须要把 9866 映射出来！🔥🔥🔥
+      - 9866:9866
+    networks:
+      - hadoop_net
+
+networks:
+  hadoop_net:

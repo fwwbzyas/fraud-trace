@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API测试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .result { background: #f5f5f5; padding: 10px; border-radius: 3px; margin-top: 10px; }
+        .error { background: #ffe6e6; color: #cc0000; }
+        .success { background: #e6ffe6; color: #006600; }
+        button { padding: 8px 16px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔧 API连接测试</h1>
+    
+    <div class="test-section">
+        <h3>1. 测试指标API连接</h3>
+        <button onclick="testIndicatorAPI()">测试 /api/indicators</button>
+        <div id="indicator-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. 测试指标统计API</h3>
+        <button onclick="testStatisticsAPI()">测试 /api/indicators/statistics</button>
+        <div id="statistics-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. 测试CORS配置</h3>
+        <button onclick="testCORS()">测试跨域请求</button>
+        <div id="cors-result" class="result"></div>
+    </div>
+
+    <script>
+        // 测试指标API
+        async function testIndicatorAPI() {
+            const resultDiv = document.getElementById('indicator-result');
+            resultDiv.innerHTML = '⏳ 正在测试...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/indicators', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ 成功！</strong><br>
+                        状态码: ${response.status}<br>
+                        数据条数: ${data.data ? data.data.length : 0}<br>
+                        响应内容: <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <strong>❌ 请求失败</strong><br>
+                        状态码: ${response.status}<br>
+                        错误信息: ${response.statusText}
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ 网络错误</strong><br>
+                    错误信息: ${error.message}<br>
+                    可能原因: 后端服务未启动或网络连接问题
+                `;
+            }
+        }
+        
+        // 测试统计API
+        async function testStatisticsAPI() {
+            const resultDiv = document.getElementById('statistics-result');
+            resultDiv.innerHTML = '⏳ 正在测试...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/indicators/statistics', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ 成功！</strong><br>
+                        状态码: ${response.status}<br>
+                        响应内容: <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <strong>❌ 请求失败</strong><br>
+                        状态码: ${response.status}<br>
+                        错误信息: ${response.statusText}
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ 网络错误</strong><br>
+                    错误信息: ${error.message}
+                `;
+            }
+        }
+        
+        // 测试CORS
+        async function testCORS() {
+            const resultDiv = document.getElementById('cors-result');
+            resultDiv.innerHTML = '⏳ 正在测试CORS...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/indicators', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'http://localhost:3000',
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <strong>✅ CORS测试完成</strong><br>
+                    状态码: ${response.status}<br>
+                    CORS头信息: <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ CORS测试失败</strong><br>
+                    错误信息: ${error.message}
+                `;
+            }
+        }
+        
+        // 页面加载时自动测试
+        window.onload = function() {
+            console.log('🚀 API测试页面已加载');
+            console.log('请点击测试按钮来诊断API连接问题');
+        };
+    </script>
+</body>
+</html>

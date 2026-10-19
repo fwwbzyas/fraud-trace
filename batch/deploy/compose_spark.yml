@@ -1,0 +1,106 @@
+version: '3'
+
+services:
+  spark-master:
+    image: apache/spark:3.4.1
+    container_name: spark-master
+    command: >
+      bash -c "
+      wget -P /opt/spark/jars https://jdbc.postgresql.org/download/postgresql-42.7.3.jar &&
+      /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+      "
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - SPARK_MASTER_HOST=0.0.0.0
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
+    ports:
+      - '9080:8080'  # Master UI
+      - '7077:7077'  # Master RPC
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # 确保Windows可以解析host.docker.internal
+    networks:
+      - spark-network
+
+  spark-worker:
+    image: apache/spark:3.4.1
+    container_name: spark-worker
+    command: >
+      bash -c "
+      wget -P /opt/spark/jars https://jdbc.postgresql.org/download/postgresql-42.7.3.jar &&
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+      "
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_WEBUI_PORT=8081
+    ports:
+      - '9081:8081'  # Worker UI
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # 确保Windows可以解析host.docker.internal
+    depends_on:
+      - spark-master
+    networks:
+      - spark-network
+
+networks:
+  spark-network:
+    driver: bridge
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

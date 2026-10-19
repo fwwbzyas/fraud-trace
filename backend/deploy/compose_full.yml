@@ -1,0 +1,105 @@
+services:
+  # PostgreSQL 数据库（首次启动仅初始化表结构）
+  postgres:
+    image: postgres:15-alpine
+    container_name: banksys-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your local .env}
+      POSTGRES_DB: banksys
+      # 性能优化配置
+      POSTGRES_SHARED_BUFFERS: 4GB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 12GB
+      POSTGRES_WORK_MEM: 256MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 1GB
+    volumes:
+      # 挂载数据导入脚本
+      - ../sql/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      # 持久化数据
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - banksys-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+  # Spring Boot 后端
+  backend:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: banksys-backend
+    environment:
+      # 数据库连接
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/banksys
+      SPRING_DATASOURCE_USERNAME: postgres
+      DB_URL: jdbc:postgresql://postgres:5432/banksys
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your local .env}
+      HDFS_URL: ${HDFS_URL:-hdfs://host.docker.internal:8020}
+      # JPA配置
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_SHOW_SQL: false
+      # 服务器配置
+      SERVER_PORT: 8080
+      # JVM参数
+      JAVA_OPTS: -Xms2g -Xmx4g -XX:+UseG1GC
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - banksys-network
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+        reservations:
+          memory: 2G
+
+  # Vue.js 前端（nginx）
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_DEMO_MODE: ${VITE_DEMO_MODE:-false}
+        VITE_DIFY_ENABLED: ${VITE_DIFY_ENABLED:-false}
+        VITE_DIFY_BASE_URL: ${VITE_DIFY_BASE_URL:-}
+        VITE_DIFY_EMBED_TOKEN: ${VITE_DIFY_EMBED_TOKEN:-}
+    container_name: banksys-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - banksys-network
+    volumes:
+      - ../../frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  banksys-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

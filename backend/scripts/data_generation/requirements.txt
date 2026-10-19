@@ -1,0 +1,13 @@
+# 银行风险分析系统 - Python 依赖包
+# PostgreSQL 数据库连接
+psycopg2-binary>=2.9.0
+
+# 假数据生成库
+Faker>=18.0.0
+
+
+
+# Used by the existing bulk generators
+tqdm>=4.65
+psutil>=5.9
+numpy>=1.24

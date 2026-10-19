@@ -1,0 +1,48 @@
+# Maven
+target/
+!target/*.jar
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# 日志
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+*~
+
+# Docker
+Dockerfile
+docker-compose*.yml
+
+# Git
+.git/
+.gitignore
+
+# 其他
+node_modules/
+dist/
+spark-warehouse/
+metastore_db/
+derby.log
+dist/
+spark-warehouse/
+metastore_db/
+derby.log
+# Documentation
+*.md
+!README.md
+
+.env
+.env.*
+!.env.example
