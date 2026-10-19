@@ -1,11 +1,29 @@
-# fraud-trace 前端
+# bankvue
 
-项目介绍、演示账号、配置和启动步骤见根目录 [README](../README.md)。
+This template should help get you started developing with Vue 3 in Vite.
+
+## Recommended IDE Setup
+
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vite.dev/config/).
+
+## Project Setup
 
 ```sh
-cp .env.example .env.local
-npm ci
+npm install
+```
+
+### Compile and Hot-Reload for Development
+
+```sh
 npm run dev
 ```
 
-示例配置默认使用模拟数据、关闭 Dify。需要 Node.js 22.12+（22.x）。
+### Compile and Minify for Production
+
+```sh
+npm run build
+```
